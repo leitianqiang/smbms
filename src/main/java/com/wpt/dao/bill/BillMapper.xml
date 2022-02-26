@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wpt.dao.bill.BillMapper">
+    <!--根据商品名称、供应商id、是否付款 查询订单总数-->
+    <select id="getBillCount" resultType="int">
+        SELECT COUNT(1)
+        FROM smbms_bill b
+          INNER JOIN smbms_provider p
+            ON b.providerId = p.id
+        <where>
+            <if test="productName != null and !productName.trim().equals('')">
+                b.productName like concat('%',#{productName},'%')
+            </if>
+            <if test="providerId != 0 and providerId != null">
+                and b.providerId = #{providerId}
+            </if>
+            <if test="isPayment != 0 and isPayment != null">
+                and b.isPayment = #{isPayment}
+            </if>
+        </where>
+    </select>
+
+    <!--根据商品名称、供应商id、是否付款、当前页码、总页数 查询订单列表-->
+    <select id="getBillList" resultType="Bill">
+        SELECT b.*,p.proName AS providerName
+        FROM smbms_bill b
+          INNER JOIN smbms_provider p
+            ON b.providerId = p.id
+        <where>
+            <if test="productName != null and !productName.trim().equals('')">
+                b.productName like concat('%',#{productName},'%')
+            </if>
+            <if test="providerId != 0 and providerId != null">
+                and b.providerId = #{providerId}
+            </if>
+            <if test="isPayment != 0 and isPayment != null">
+                and b.isPayment = #{isPayment}
+            </if>
+        </where>
+        order by b.creationDate desc limit #{currentPageNo},#{pageSize}
+    </select>
+
+    <!--新添订单-->
+    <insert id="addBill" parameterType="Bill">
+        INSERT INTO smbms_bill
+        (billCode,productName,productDesc,productUnit,productCount,totalPrice,
+        isPayment,createdBy,creationDate,providerId)
+        VALUES
+        (#{billCode},#{productName},#{productDesc},#{productUnit},#{productCount},
+        #{totalPrice},#{isPayment},#{createdBy},#{creationDate},#{providerId})
+    </insert>
+
+    <!--根据 订单id 查询订单信息-->
+    <select id="queryBillById" resultType="Bill">
+        SELECT b.*,p.proName AS providerName
+        FROM smbms_bill b
+          INNER JOIN smbms_provider p
+            ON b.providerId = p.id
+        WHERE b.id = #{id}
+    </select>
+
+    <!--修改订单-->
+    <update id="updateBill" parameterType="Bill">
+        UPDATE smbms_bill
+        <set>
+            <if test="billCode != null">billCode = #{billCode} ,</if>
+            <if test="productName != null">productName = #{productName} ,</if>
+            <if test="productDesc != null">productDesc = #{productDesc} ,</if>
+            <if test="productUnit != null">productUnit = #{productUnit} ,</if>
+            <if test="productCount != null">productCount = #{productCount} ,</if>
+            <if test="totalPrice != null">totalPrice = #{totalPrice} ,</if>
+            <if test="isPayment != null">isPayment = #{isPayment} ,</if>
+            <if test="modifyBy != null">modifyBy = #{modifyBy} ,</if>
+            <if test="modifyDate != null">modifyDate = #{modifyDate},</if>
+        </set>
+            WHERE
+            id = #{id}
+    </update>
+
+    <!--根据id 删除 订单-->
+    <delete id="deleteBill" parameterType="int">
+        delete from smbms_bill where id = #{id}
+    </delete>
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wpt.dao.provider.ProviderMapper">
+
+    <!--根据供应商编码 或 供应商名称 查询供应商总数-->
+    <select id="getProviderCounts" resultType="int">
+        select count(1) from smbms.smbms_provider
+        <where>
+            <if test="proCode != null and !proCode.trim().equals('')">
+                proCode = #{proCode}
+            </if>
+            <if test="proName != null and !proName.trim().equals('')">
+                and proName like concat('%',#{proName},'%')
+            </if>
+        </where>
+    </select>
+
+    <!--根据 供应商编码 和 供应商名称 和 当前页码、页码size 查询供应商数据列表-->
+    <select id="getProviderList" resultType="Provider">
+        select * from smbms.smbms_provider
+        <where>
+            <if test="proCode != null and !proCode.trim().equals('')">
+                proCode = #{proCode}
+            </if>
+            <if test="proName != null and !proName.trim().equals('')">
+                and proName like concat('%',#{proName},'%')
+            </if>
+        </where>
+        order by creationDate DESC limit #{currentPageNo},#{pageSize}
+    </select>
+
+    <!--添加供应商-->
+    <insert id="addProvider" parameterType="Provider">
+        insert into smbms.smbms_provider(proCode, proName, proDesc, proContact, proPhone, proAddress, proFax, createdBy, creationDate)
+        values
+        (#{proCode},#{proName},#{proDesc},#{proContact},#{proPhone},#{proAddress},#{proFax},#{createdBy},#{creationDate})
+    </insert>
+
+    <!--根据id 查询供应商信息-->
+    <select id="queryProviderById" resultType="Provider" parameterType="int">
+        select * from smbms.smbms_provider where id = #{id}
+    </select>
+
+    <!--根据id 修改 供应商信息-->
+    <update id="updateProvider" parameterType="Provider">
+        update smbms.smbms_provider
+        <set>
+            <if test="proCode">proCode = #{proCode} ,</if>
+            <if test="proName">proName = #{proName} ,</if>
+            <if test="proDesc">proDesc = #{proDesc} ,</if>
+            <if test="proContact">proContact = #{proContact} ,</if>
+            <if test="proPhone">proPhone = #{proPhone} ,</if>
+            <if test="proAddress">proAddress = #{proAddress} ,</if>
+            <if test="proFax">proFax = #{proFax} ,</if>
+            <if test="modifyDate">modifyDate = #{modifyDate} ,</if>
+            <if test="modifyBy">modifyBy = #{modifyBy}</if>
+        </set>
+        WHERE
+        id = #{id}
+    </update>
+
+    <!--根据id 删除 供应商-->
+    <delete id="deleteProvider" parameterType="int">
+        delete from smbms.smbms_provider where id = #{id}
+    </delete>
+</mapper>
